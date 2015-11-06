@@ -14,23 +14,22 @@ def main():
 	for x in range(30):
 		testWorld.ground.append((x, 9))
 
+	print "ground:", testWorld.ground, "\n"
+
 	testWorld.makeVisible()
 
 	# testWorld.readWorldConfigFile("testConfig.txt")
 	# print "done loading\n"
 
 
-	print "ground:", testWorld.ground
 
+	marAgent = Mario(testWorld, "Mario", 0, 9)
+	marAgent.makeVisible("red")
 
+	for i in range(100):
+		marAgent.translate(2)
 
-
-
-
-	time.sleep(100)
-
-
-	# marAgent = Mario(testWorld, "Mario", 20, 20)
+	time.sleep(50)
 
 	# print "ground: \n", testWorld.ground
 
