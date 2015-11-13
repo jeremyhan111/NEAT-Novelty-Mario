@@ -2,3 +2,15 @@
 October 30th:
 Sketched world, talked about how to implement agents and the world.
 Started coding up World and Mario classes. 
+November 6:
+Coded up a mario simulation earlier, but wanted to start over 
+because we realized that our previous design style wasn't ideal.
+
+November 7:
+Began writing the new world simulation. Create goombas, coins, 
+blocks. Decided that the world could be represented by tuples that
+indicate which object belongs in which grid space. 
+
+November 12:
+Designed a Mario that can move left and right, and currently 
+working on jump function as well as all the boundary conditions. 

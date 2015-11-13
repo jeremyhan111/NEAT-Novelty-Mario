@@ -3,7 +3,7 @@ from marioSim2 import *
 
 def main():
 
-	testWorld = World("test", 520, 140, 20)
+	testWorld = World("test", 1080, 280, 40)
 
 	testWorld.readWorldConfigFile("testConfig.txt")
 
@@ -26,13 +26,18 @@ def main():
 
 	testWorld.printWorld()
 
+	mario = Mario(testWorld, "Mario", 2, 2)
+	testWorld.addMario(mario)
+
 	testWorld.makeVisible()
 
 	for i in range(100):
 		for goomba in testWorld.goombas:
-			goomba.move()
+			goomba.moveGoomba()
+		
+		mario.update(-0.4)
 
-		sleep(0.5)
+		sleep(1)
 
 	time.sleep(100)
 

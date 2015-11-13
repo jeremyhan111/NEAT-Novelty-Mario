@@ -79,6 +79,10 @@ class World(object):
 					print "?",
             
 			print "\n"
+
+	def addMario(self, mario):
+		"""Adds an agent to the world"""
+		self.mario = mario
 	
 	def makeVisible(self):
 		"""Creates a graphics window making the world visible"""
@@ -120,6 +124,8 @@ class World(object):
 			platLine.setWidth(5)
 			platLine.setFill("blue")
 			platLine.draw(self.window)
+
+		self.mario.makeVisible()
 
 
 
@@ -287,18 +293,23 @@ class Goomba(object):
 		p2 = Point((x + 0.875)*self.scale, (y + 1)*self.scale)
 		self.goombaOval = Oval(p1, p2)
 		self.goombaOval.setFill("brown")
+		self.makeVisible = False
 
 
 	def drawGoomba(self):
-			
-			self.goombaOval.draw(self.world.window)
+		self.makeVisible = True	
+		self.goombaOval.draw(self.world.window)
 
-	def move(self):
+	def undrawGoomba(self):
+		self.goombaOval.undraw()
+
+	def moveGoomba(self):
 
 		if self.x == self.leftMax:
 			if self.moveRight:
 				self.x += 1
-				self.goombaOval.move(1*self.scale, 0)
+				if self.makeVisible:
+					self.goombaOval.move(1*self.scale, 0)
 
 			else:
 				self.moveRight = True
@@ -308,15 +319,287 @@ class Goomba(object):
 				self.moveRight = False
 			else:
 				self.x -= 1
-				self.goombaOval.move(-1*self.scale, 0)
+				if self.makeVisible:
+					self.goombaOval.move(-1*self.scale, 0)
 
 		else:
 			if self.moveRight:
 				self.x += 1
-				self.goombaOval.move(1*self.scale, 0)
+				if self.makeVisible:
+					self.goombaOval.move(1*self.scale, 0)
 
 			else:
 				self.x -= 1
-				self.goombaOval.move(-1*self.scale, 0)
+				if self.makeVisible:
+					self.goombaOval.move(-1*self.scale, 0)
 
 
+class Mario(object):
+	"""docstring for Mario"""
+
+	def __init__(self, world, name, x, y, color = "red"):
+		""" COMMENT """
+
+		self.world = world
+		self.name = name
+		self.x = x # in terms of grid coords
+		self.y = y # in terms of grid coords
+		self.radius = self.world.gridDim / 2
+		self.color = color
+		self.visible = False
+		self.visibleAgent = None
+		self.brain = None
+
+		self.nextX = x
+		self.nextY = y
+		self.dx = 0
+		self.dy = 0
+
+		self.inTheAir = False
+		self.jumpingUp = False
+		self.jumpNextMove = None
+		self.falling = True
+
+	def makeVisible(self):
+		if self.world.madeWin == False:
+			self.world.makeVisible()
+			self.world.madeWin = True;
+		self.visibleAgent = VisibleMario(self, self.color)
+		self.visible = True
+
+	def translate(self, amt):
+		""" where amt is -1, 0, 1 """
+
+		self.nextX = self.x + amt
+		self.nextY = self.y + 0
+
+		self.dx = amt
+		self.dy = 0
+
+	def jump(self, direction):
+		""" where direction is -1 for left and 1 for right"""
+		self.nextX = self.x + 0
+		self.nextY = self.y + 1
+
+		self.dx = 0
+		self.dy = 1
+
+		self.jumpingUp = True
+
+		self.jumpNextMove = direction
+
+	def translateAir(self):
+		self.nextX = self.x + self.jumpNextMove
+		self.nextY = self.y + 0
+
+		self.dx = self.jumpNextMove
+		self.dy = 0
+
+		self.jumpNextMove = None
+
+	def fall(self):
+		self.nextX = self.x + 0
+		self.nextY = self.y - 1
+
+		dx = 0
+		dy = -1
+
+	def checkBounds(self):
+
+		print self.nextX, self.nextY
+
+		if self.jumpingUp:
+			if (self.nextX, self.nextY) in self.world.validAirspace:
+				self.x = self.nextX
+				self.y = self.nextY
+				self.inTheAir = True
+				self.jumpingUp = False
+
+				if self.visible:
+	            	# move by 1 grid size
+					print "supposed to draw?"
+					self.visibleAgent.moveMario(self.dx, self.dy)
+
+			elif (self.nextX, self.nextY) in self.world.coinboxesList:
+				pass
+				
+				#self.coinScore += 1
+
+				#remove coinbox
+				#undraw coinbox
+
+		elif self.inTheAir:
+			if (self.nextX, self.nextY) in self.world.validStand or (self.nextX, self.nextY) in self.world.platforms:
+				# jumped onto a valid standing spot
+				self.inTheAir = False
+				#todo: set all other air variables to what they should be
+				self.x = self.nextX
+				self.y = self.nextY
+
+				if self.visible:
+	            	# move by 1 grid size
+					print "supposed to draw?"
+					self.visibleAgent.moveMario(self.dx, self.dy)
+
+			elif (self.nextX, self.nextY) in self.world.validAirspace:
+				#jumped into a valid airspace
+				self.falling = True
+				self.x = self.nextX
+				self.y = self.nextY
+
+				if self.visible:
+	            	# move by 1 grid size
+					print "supposed to draw?"
+					self.visibleAgent.moveMario(self.dx, self.dy)
+
+			elif self.falling:
+				if (self.nextX, self.nextY) in self.world.validStand or (self.nextX, self.nextY) in self.world.platforms:
+					# landed onto a valid standing spot
+					self.inTheAir = False
+					#todo: set all other air variables to what they should be
+					self.x = self.nextX
+					self.y = self.nextY
+
+					if self.visible:
+		            	# move by 1 grid size
+						print "supposed to draw?"
+						self.visibleAgent.moveMario(self.dx, self.dy)
+
+				if (self.nextX, self.nextY) in self.world.validAirspace:
+					#jumped into a valid airspace
+					self.falling = True
+					self.x = self.nextX
+					self.y = self.nextY
+
+					if self.visible:
+		            	# move by 1 grid size
+						print "supposed to draw?"
+						self.visibleAgent.moveMario(self.dx, self.dy)			
+
+			else:
+				# not a valid place to jump into
+				pass
+
+
+		elif (self.nextX, self.nextY) in self.world.validStand or (self.nextX, self.nextY) in self.world.platforms:
+			print "is a valid standing spot"
+
+			self.x = self.nextX
+			self.y = self.nextY
+
+			#check for goombas
+			if (self.x, self.y) in self.world.goombaList:
+				print "Mario is now dead"
+
+			if self.visible:
+            	# move by 1 grid size
+				print "supposed to draw?"
+				self.visibleAgent.moveMario(self.dx, self.dy)
+
+		else:
+			print "not valid"
+
+        
+        
+
+	def update(self, cmd):
+		"""Ensure that the given translate and rotate commands are in the
+		expected bounds of [-1, 1], then using the speed of the agent
+		determine the amount of movement to make. Calls the translate and
+		rotate methods to do the movement"""
+        
+
+		if cmd > 1 or cmd < -1:
+			print "Invalid move. Has to be between [-1, 1]\n"
+			exit()
+
+		if not self.inTheAir and not self.falling:
+			if cmd >= -1 and cmd < -0.6: # move left
+				self.translate(-1)
+			elif cmd >= -0.6 and cmd < -0.2: # move right
+				self.translate(1)
+			elif cmd >= -0.2 and cmd < 0.2: # jump left
+				pass
+			elif cmd >= 0.2 and cmd < 0.6:  # jump right
+				pass	
+			else: # duck
+				pass
+
+		if self.inTheAir and self.jumpNextMove:
+			#already in the air and need to move left or right
+			self.translateAir()
+
+		elif self.falling:
+			self.fall()
+
+
+
+		self.checkBounds()
+
+	def setBrain(self, brain):
+		"""Set the agent's brain to be the given brain"""
+		self.brain = brain
+		self.brain.agent = self
+
+	def stepBrain(self):
+		"""Get the next action, which is a move command amount in the 
+		range [-1,1], from the brain and execute it"""
+		move = self.brain.selectAction()
+		self.update(move)
+
+
+class VisibleMario(object):
+	"""
+    A visible version of an Agent object that can be viewed in a
+    graphics window.
+    """
+
+	def __init__(self, mario, color):
+		"""Mario agents are Circles objects """
+		self.mario = mario
+		self.window = self.mario.world.window
+
+		scale = self.mario.world.gridDim
+		center = Point(self.mario.x*scale + scale/2, self.mario.y*scale + scale/2)
+
+		self.body = Circle(center, scale/2)
+		self.body.setFill(color)
+
+		self.draw()
+
+
+	def moveMario(self, dx, dy):
+		"""Move the Circles representing the agent the given dx, dy amount"""
+
+		dx = dx * self.mario.world.gridDim
+		dy = dy * self.mario.world.gridDim
+
+		self.body.move(dx, dy)
+		print "move mario: ", dx, dy
+
+
+	def draw(self):
+		"""Draw the agent in the world"""
+		self.body.draw(self.window)
+    
+	def undraw(self):
+		"""Hide the agent"""
+		self.body.undraw()
+
+class Brain(object):
+    """
+    Abstract class for representing brains of agents.
+    """
+    def __init__(self):
+        self.agent = None
+    def selectAction(self):
+        """
+        Should return two float values in the range [-1,1] representing
+        translate and rotate commands.
+        """
+        abstract()
+
+class ForwardBrain(Brain):
+    """Go full forward"""
+    def selectAction(self):
+        return -0.9
