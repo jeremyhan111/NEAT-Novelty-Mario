@@ -36,6 +36,25 @@ def main():
 			goomba.moveGoomba()
 		
 		mario.update(-0.4)
+		sleep(1)
+		mario.update(-0.4)
+		sleep(1)
+		mario.update(-0.4)
+		sleep(1)
+		mario.update(-0.4)
+		sleep(1)
+		mario.update(0.4)
+		sleep(1)
+		mario.update(-0.4)
+		sleep(1)
+		mario.update(-0.4)
+		sleep(1)
+		mario.update(-0.4)
+		sleep(1)
+		mario.update(0.4)
+
+
+
 
 		sleep(1)
 
