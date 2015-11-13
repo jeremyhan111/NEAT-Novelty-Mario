@@ -1,5 +1,6 @@
 from graphics import *
 from marioSim2 import *
+from random import *
 
 def main():
 
@@ -26,38 +27,33 @@ def main():
 
 	testWorld.printWorld()
 
-	mario = Mario(testWorld, "Mario", 2, 2)
+	mario = Mario(testWorld, "Mario", 10, 4)
 	testWorld.addMario(mario)
 
 	testWorld.makeVisible()
+	
+
+	x = True
 
 	for i in range(100):
 		for goomba in testWorld.goombas:
 			goomba.moveGoomba()
 		
-		mario.update(-0.4)
-		sleep(1)
-		mario.update(-0.4)
-		sleep(1)
-		mario.update(-0.4)
-		sleep(1)
-		mario.update(-0.4)
-		sleep(1)
-		mario.update(0.4)
-		sleep(1)
-		mario.update(-0.4)
-		sleep(1)
-		mario.update(-0.4)
-		sleep(1)
-		mario.update(-0.4)
-		sleep(1)
-		mario.update(0.4)
+		
+		#if x:
+		mario.update((random()*2)-1)
+			#x = False
+
+		# else:
+		# 	mario.update(-0.3)
+		# 	x = True
+
+
+		
 
 
 
 
-		sleep(1)
-
-	time.sleep(100)
+		sleep(0.5)
 
 main()

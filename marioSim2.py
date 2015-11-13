@@ -165,6 +165,16 @@ class World(object):
 
 				platformList.pop(0)
 
+		for coinbox in self.coinboxesList:
+
+			potentialValidStand = (coinbox[0], coinbox[1] - 1)
+
+			if potentialValidStand in self.validStand:
+				continue
+
+			else:
+				self.validStand.append(potentialValidStand)
+
 
 	def getAirspace(self):
 		""" Once the validStand list is complete, call this function to create a
@@ -360,6 +370,8 @@ class Mario(object):
 		self.jumpNextMove = None
 		self.falling = False
 
+		self.coinScore = 0
+
 	def makeVisible(self):
 		if self.world.madeWin == False:
 			self.world.makeVisible()
@@ -379,10 +391,10 @@ class Mario(object):
 	def jump(self, direction):
 		""" where direction is -1 for left and 1 for right"""
 		self.nextX = self.x + 0
-		self.nextY = self.y + 1
+		self.nextY = self.y - 1
 
 		self.dx = 0
-		self.dy = 1
+		self.dy = -1
 
 		self.jumpingUp = True
 
@@ -396,20 +408,23 @@ class Mario(object):
 		self.dy = 0
 
 		self.jumpNextMove = None
+		self.falling = True
 
 	def fall(self):
 		self.nextX = self.x + 0
-		self.nextY = self.y - 1
+		self.nextY = self.y + 1
 
-		dx = 0
-		dy = -1
+		self.dx = 0
+		self.dy = +1
 
 	def checkBounds(self):
 
-		print self.nextX, self.nextY
+		print "\n\nnext step", self.nextX, self.nextY
+		print "inTheAir: ", self.inTheAir, " falling: ", self.falling
 		drawValid = True
 
 		if self.jumpingUp:
+			print "jumping up"
 			if (self.nextX, self.nextY) in self.world.validAirspace:
 				self.x = self.nextX
 				self.y = self.nextY
@@ -419,14 +434,23 @@ class Mario(object):
 				
 
 			elif (self.nextX, self.nextY) in self.world.coinboxesList:
-				pass
+				self.jumpingUp = False
+				self.jumpNextMove = None
+				drawValid = False
+
 				
-				#self.coinScore += 1
+				
+				self.coinScore += 1
 
 				#remove coinbox
 				#undraw coinbox
 
+			# else:
+			# 	self.jumpingUp = False
+
+
 		elif self.inTheAir:
+			print "In the air"
 			if (self.nextX, self.nextY) in self.world.validStand or (self.nextX, self.nextY) in self.world.platforms:
 				# jumped onto a valid standing spot
 				self.inTheAir = False
@@ -439,6 +463,7 @@ class Mario(object):
 
 			elif (self.nextX, self.nextY) in self.world.validAirspace:
 				#jumped into a valid airspace
+				print "valid airspace"
 				self.falling = True
 				self.x = self.nextX
 				self.y = self.nextY
@@ -447,6 +472,8 @@ class Mario(object):
 			else:
 				# not a valid place to jump into
 				drawValid = False
+
+		
 
 
 		elif (self.nextX, self.nextY) in self.world.validStand or (self.nextX, self.nextY) in self.world.platforms:
@@ -459,6 +486,13 @@ class Mario(object):
 			if (self.x, self.y) in self.world.goombaList:
 				print "Mario is now dead"
 
+		
+		elif (self.nextX, self.nextY) in self.world.validAirspace:
+			print "got into a valid airspace "
+			self.inTheAir = True
+			self.falling = True
+			self.x = self.nextX
+			self.y = self.nextY
 
 		else:
 			print "not valid"
@@ -466,7 +500,6 @@ class Mario(object):
 
 		if self.visible and drawValid:
         	# move by 1 grid size
-			print "supposed to draw?"
 			self.visibleAgent.moveMario(self.dx, self.dy)
 
         
@@ -484,22 +517,28 @@ class Mario(object):
 			exit()
 
 		if not self.inTheAir and not self.falling:
+			print "Excecuting command"
 			if cmd >= -1 and cmd < -0.6: # move left
 				self.translate(-1)
 			elif cmd >= -0.6 and cmd < -0.2: # move right
+				print "move right"
 				self.translate(1)
 			elif cmd >= -0.2 and cmd < 0.2: # jump left
 				self.jump(-1)
 			elif cmd >= 0.2 and cmd < 0.6:  # jump right
+				print "jump right"
+
 				self.jump(1)
 			else: # duck
 				pass
 
 		if self.inTheAir and self.jumpNextMove:
 			#already in the air and need to move left or right
+			print "calling translateAir"
 			self.translateAir()
 
 		elif self.falling:
+			print "falling"
 			self.fall()
 
 
@@ -545,7 +584,6 @@ class VisibleMario(object):
 		dy = dy * self.mario.world.gridDim
 
 		self.body.move(dx, dy)
-		print "move mario: ", dx, dy
 
 
 	def draw(self):
