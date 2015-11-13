@@ -14,3 +14,7 @@ indicate which object belongs in which grid space.
 November 12:
 Designed a Mario that can move left and right, and currently 
 working on jump function as well as all the boundary conditions. 
+
+November 13:
+Worked more on the update function and fixed some bugs in checkBounds.
+Did a lot of testing. There are still so many bugs! 
