@@ -18,3 +18,8 @@ working on jump function as well as all the boundary conditions.
 November 13:
 Worked more on the update function and fixed some bugs in checkBounds.
 Did a lot of testing. There are still so many bugs! 
+
+November 16:
+Fixed many bugs. Can run in simulation. Mario can kill goombas, and can be
+killed by goombas in many different ways. It works by using a random generator
+as well. Need to add coin count, coinbox count, secret room, and end flag. 

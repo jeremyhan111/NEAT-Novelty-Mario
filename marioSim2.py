@@ -31,6 +31,7 @@ class World(object):
 		self.hiddenEntrances = [] #same indexing order as hiddenRoomBonus
 		self.finishFlag = []
 		self.goombaList = []
+		self.goombaListLastDirection = []
 		self.coinsList = []
 		self.coinboxesList = []
 
@@ -156,8 +157,8 @@ class World(object):
 			if platform in self.ground:
 				continue
 
-			elif platform in platformList:
-				continue
+			# elif platform in platformList:
+			# 	continue
 
 			else:
 				self.validStand.append(platform)
@@ -252,6 +253,7 @@ class World(object):
 						self.goombaList.append((x, y))
 						goomba = Goomba(self, x, y, dist)
 						self.goombas.append(goomba)
+						self.goombaListLastDirection.append(0)
 					elif fileWordList[i] == "coin":
 						self.coinsList.append((x, y))
 					elif fileWordList[i] == "coinbox":
@@ -305,7 +307,6 @@ class Goomba(object):
 		self.goombaOval.setFill("brown")
 		self.makeVisible = False
 
-
 	def drawGoomba(self):
 		self.makeVisible = True	
 		self.goombaOval.draw(self.world.window)
@@ -315,33 +316,42 @@ class Goomba(object):
 
 	def moveGoomba(self):
 
-		if self.x == self.leftMax:
-			if self.moveRight:
+		if self.x == self.leftMax: #if goomba is at the max left point
+			if self.moveRight: # goomba wants to move right now
 				self.x += 1
+				self.world.goombaListLastDirection.append(1)
 				if self.makeVisible:
 					self.goombaOval.move(1*self.scale, 0)
 
-			else:
+			else: # goomba should wait at max point for one time step
+				self.world.goombaListLastDirection.append(0)
 				self.moveRight = True
 
-		elif self.x == self.rightMax:
-			if self.moveRight:
+		elif self.x == self.rightMax: #if goomba is at the max right point
+			if self.moveRight: #if it still wants to move right, wait there for one time step
+				self.world.goombaListLastDirection.append(0)
 				self.moveRight = False
-			else:
+			else: # otherwise start moving left
 				self.x -= 1
+				self.world.goombaListLastDirection.append(-1)
+
 				if self.makeVisible:
 					self.goombaOval.move(-1*self.scale, 0)
 
-		else:
-			if self.moveRight:
+		else: # normal moving situations
+			if self.moveRight: 
 				self.x += 1
+				self.world.goombaListLastDirection.append(1)
 				if self.makeVisible:
 					self.goombaOval.move(1*self.scale, 0)
 
 			else:
 				self.x -= 1
+				self.world.goombaListLastDirection.append(-1)
 				if self.makeVisible:
 					self.goombaOval.move(-1*self.scale, 0)
+
+		self.world.goombaList.append((self.x, self.y))
 
 
 class Mario(object):
@@ -360,6 +370,8 @@ class Mario(object):
 		self.visibleAgent = None
 		self.brain = None
 
+		self.lastX = x
+		self.lastY = y
 		self.nextX = x
 		self.nextY = y
 		self.dx = 0
@@ -369,8 +381,11 @@ class Mario(object):
 		self.jumpingUp = False
 		self.jumpNextMove = None
 		self.falling = False
+		self.drawValid = True
 
 		self.coinScore = 0
+
+		self.alive = True
 
 	def makeVisible(self):
 		if self.world.madeWin == False:
@@ -387,6 +402,28 @@ class Mario(object):
 
 		self.dx = amt
 		self.dy = 0
+
+		#check for goombas and marios switching spots
+		if amt == 1: # if mario is moving right, check that goomba didn't just move to the left of mario
+			if (self.x, self.y) in self.world.goombaList:
+				index = self.world.goombaList.index((self.x, self.y))
+				
+				# if goomba is moving left
+				if self.world.goombaListLastDirection[index] == -1:
+					# mario is now dead because he walked past a goomba
+					print "Mario is now dead mar right goomb left"
+					self.alive = False
+
+		elif amt == -1: # mario is moving left, check that a goomba didn't just move to the right of mario
+			if (self.x, self.y) in self.world.goombaList:
+				index = self.world.goombaList.index((self.x, self.y))
+
+				# if goomba is moving right
+				if self.world.goombaListLastDirection[index] == 1:
+					# mario is now dead because he walked past a goomba
+					print "Mario is now dead mar left goomb right"
+					self.alive = False
+
 
 	def jump(self, direction):
 		""" where direction is -1 for left and 1 for right"""
@@ -419,12 +456,13 @@ class Mario(object):
 
 	def checkBounds(self):
 
-		print "\n\nnext step", self.nextX, self.nextY
-		print "inTheAir: ", self.inTheAir, " falling: ", self.falling
-		drawValid = True
+		
+		self.drawValid = True
+
+
 
 		if self.jumpingUp:
-			print "jumping up"
+			# print "jumping up"
 			if (self.nextX, self.nextY) in self.world.validAirspace:
 				self.x = self.nextX
 				self.y = self.nextY
@@ -436,7 +474,7 @@ class Mario(object):
 			elif (self.nextX, self.nextY) in self.world.coinboxesList:
 				self.jumpingUp = False
 				self.jumpNextMove = None
-				drawValid = False
+				self.drawValid = False
 
 				
 				
@@ -450,7 +488,7 @@ class Mario(object):
 
 
 		elif self.inTheAir:
-			print "In the air"
+			# print "In the air"
 			if (self.nextX, self.nextY) in self.world.validStand or (self.nextX, self.nextY) in self.world.platforms:
 				# jumped onto a valid standing spot
 				self.inTheAir = False
@@ -460,24 +498,50 @@ class Mario(object):
 				self.y = self.nextY
 
 				
+				#check for goombas
+				if (self.x, self.y) in self.world.goombaList:
+					print "Goomba is now dead"
+					
+					index = self.world.goombaList.index((self.x, self.y))
+
+					goombaToDelete = self.world.goombas[index]
+
+					goombaToDelete.undrawGoomba()
+
+					self.world.goombaList.remove((self.x, self.y))
+					self.world.goombas.remove(goombaToDelete)
+
+
+					self.coinScore += 1
+
+
+
+
+					#find this goomba in the goomba list
+					#remove this goomba from self.world.goombas
+					#coin ++
 
 			elif (self.nextX, self.nextY) in self.world.validAirspace:
 				#jumped into a valid airspace
-				print "valid airspace"
+				# print "valid airspace"
 				self.falling = True
 				self.x = self.nextX
 				self.y = self.nextY
 
 
+
 			else:
 				# not a valid place to jump into
-				drawValid = False
+				print "not valid jump"
+				self.dx = 0 
+				self.dy = 0
+				self.drawValid = False
 
 		
 
 
 		elif (self.nextX, self.nextY) in self.world.validStand or (self.nextX, self.nextY) in self.world.platforms:
-			print "is a valid standing spot"
+			# print "is a valid standing spot"
 
 			self.x = self.nextX
 			self.y = self.nextY
@@ -485,22 +549,27 @@ class Mario(object):
 			#check for goombas
 			if (self.x, self.y) in self.world.goombaList:
 				print "Mario is now dead"
+				self.alive = False
+
 
 		
 		elif (self.nextX, self.nextY) in self.world.validAirspace:
-			print "got into a valid airspace "
+			# print "got into a valid airspace "
 			self.inTheAir = True
 			self.falling = True
 			self.x = self.nextX
 			self.y = self.nextY
 
 		else:
-			print "not valid"
-			drawValid = False
+			# print "not valid"
+			print "not valid move"
+			self.dx = 0 
+			self.dy = 0
+			self.drawValid = False
 
-		if self.visible and drawValid:
-        	# move by 1 grid size
-			self.visibleAgent.moveMario(self.dx, self.dy)
+		# if self.visible and drawValid:
+  #       	# move by 1 grid size
+		# 	self.visibleAgent.moveMario(self.dx, self.dy)
 
         
         
@@ -510,6 +579,9 @@ class Mario(object):
 		expected bounds of [-1, 1], then using the speed of the agent
 		determine the amount of movement to make. Calls the translate and
 		rotate methods to do the movement"""
+
+		print "\n\n this step", self.x, self.y
+		print "inTheAir: ", self.inTheAir, " falling: ", self.falling
         
 
 		if cmd > 1 or cmd < -1:
@@ -519,17 +591,20 @@ class Mario(object):
 		if not self.inTheAir and not self.falling:
 			print "Excecuting command"
 			if cmd >= -1 and cmd < -0.6: # move left
+				print "move left"
 				self.translate(-1)
 			elif cmd >= -0.6 and cmd < -0.2: # move right
 				print "move right"
 				self.translate(1)
 			elif cmd >= -0.2 and cmd < 0.2: # jump left
+				print "jump left"
 				self.jump(-1)
 			elif cmd >= 0.2 and cmd < 0.6:  # jump right
 				print "jump right"
 
 				self.jump(1)
 			else: # duck
+				print "duck"
 				pass
 
 		if self.inTheAir and self.jumpNextMove:
@@ -542,8 +617,18 @@ class Mario(object):
 			self.fall()
 
 
+		self.lastX = self.x
+		self.lastY = self.y
 
 		self.checkBounds()
+		print "mario:", (self.x, self.y)
+		print "goomba:", (self.world.goombaList)
+
+		if self.visible and self.drawValid:
+			# move by 1 grid size
+			dx = self.x - self.lastX
+			dy = self.y - self.lastY
+			self.visibleAgent.moveMario(dx, dy)
 
 	def setBrain(self, brain):
 		"""Set the agent's brain to be the given brain"""
