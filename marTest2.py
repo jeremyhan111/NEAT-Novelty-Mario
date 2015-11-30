@@ -27,10 +27,12 @@ def main():
 
 	testWorld.printWorld()
 
-	mario = Mario(testWorld, "Mario", 1, 5)
+	mario = Mario(testWorld, "Mario", 9, 4)
 	testWorld.addMario(mario)
 
-	#testWorld.makeVisible()
+	testWorld.makeVisible()
+
+	sleep(0.5)
 	
 
 	x = True
@@ -40,7 +42,7 @@ def main():
 			#sleep(3)
 			break
 
-		#sleep(.1)
+		sleep(0.5)
 		testWorld.goombaList = []
 		testWorld.goombaListLastDirection = []
 		for goomba in testWorld.goombas:
@@ -48,17 +50,6 @@ def main():
 		
 		
 		mario.update((random()*2)-1)
-			#x = False
-
-		# else:
-		# 	mario.update(-0.3)
-		# 	x = True
-
-
-		
-
-
-
 
 		
 

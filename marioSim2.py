@@ -30,10 +30,12 @@ class World(object):
 		self.validAirspace = []
 		self.hiddenEntrances = [] #same indexing order as hiddenRoomBonus
 		self.finishFlag = []
-		self.goombaList = []
+		self.goombaList = [] # goomba object list
 		self.goombaListLastDirection = []
-		self.coinsList = []
-		self.coinboxesList = []
+		self.coinsList = [] # x, y list of where coins are located
+		self.coinObjectList = [] # coin object list
+		self.coinboxesList = [] # x, y coinbox list
+		self.coinboxObjectList = []
 
 
 		# objects:
@@ -102,17 +104,15 @@ class World(object):
 
 		for coin in self.coinsList:
 			center = Point(coin[0]*scale + scale/2, coin[1]*scale + scale/2)
+
 			coinCircle = Circle(center, scale/2)
 			coinCircle.setFill("yellow")
 			coinCircle.draw(self.window)
+			self.coinObjectList.append(coinCircle)
 
-		for coinbox in self.coinboxesList:
-			p1 = Point(coinbox[0]*scale, coinbox[1]*scale)
-			p2 = Point((coinbox[0] + 1)*scale, (coinbox[1] + 1)*scale)
 
-			coinRect = Rectangle(p1, p2)
-			coinRect.setFill("brown")
-			coinRect.draw(self.window)
+		for coinbox in self.coinboxObjectList:
+			coinbox.drawCoin()	
 
 		for goomba in self.goombas:
 			goomba.drawGoomba()
@@ -258,6 +258,8 @@ class World(object):
 						self.coinsList.append((x, y))
 					elif fileWordList[i] == "coinbox":
 						self.coinboxesList.append((x, y))
+						coin = Coinbox(self, x, y)
+						self.coinboxObjectList.append(coin)
 					elif fileWordList[i] == "hiddenRoomEntrance":
 						self.hiddenEntrances.append((x, y))
 					elif fileWordList[i] == "finishFlag":
@@ -287,6 +289,37 @@ class World(object):
 				   "end \n" 
 
 		exit(1)
+
+class Coinbox(object):
+	""" COMMENT """
+
+	def __init__(self, world, x, y):
+		
+		self.world = world
+		self.x = x
+		self.y = y
+		self.stillContainsCoin = True
+		
+		scale = self.world.gridDim
+
+		p1 = Point(x*scale, y*scale)
+		p2 = Point((x + 1)*scale, (y + 1)*scale)
+
+		self.coinRect = Rectangle(p1, p2)
+		self.coinRect.setFill("brown")
+
+	def drawCoin(self):
+		self.coinRect.draw(self.world.window)
+
+	def undrawCoin(self):
+		self.coinRect.undraw()
+	
+	def hit(self):
+
+		if self.stillContainsCoin:
+			self.stillContainsCoin = False
+			self.coinRect.setFill("white")
+			
 
 class Goomba(object):
 	""" COMMENT """
@@ -459,16 +492,21 @@ class Mario(object):
 		
 		self.drawValid = True
 
-
-
 		if self.jumpingUp:
-			# print "jumping up"
+			# If jumping up into the air
 			if (self.nextX, self.nextY) in self.world.validAirspace:
 				self.x = self.nextX
 				self.y = self.nextY
 				self.inTheAir = True
 				self.jumpingUp = False
 
+				if (self.x, self.y) in self.world.coinsList:
+					self.coinScore += 1
+					coinIndex = self.world.coinsList.index((self.x, self.y))
+					coinToDelete = self.world.coinObjectList[coinIndex]
+					coinToDelete.undraw() # undraw coin
+					self.world.coinsList.remove((self.x, self.y)) # remove coins from list
+					self.world.coinObjectList.remove(coinToDelete)
 				
 
 			elif (self.nextX, self.nextY) in self.world.coinboxesList:
@@ -476,19 +514,18 @@ class Mario(object):
 				self.jumpNextMove = None
 				self.drawValid = False
 
-				
-				
 				self.coinScore += 1
 
-				#remove coinbox
-				#undraw coinbox
+				coinBoxIndex = self.world.coinboxesList.index((self.nextX, self.nextY))
+				self.world.coinboxObjectList[coinBoxIndex].hit()
+
 
 			# else:
 			# 	self.jumpingUp = False
 
 
 		elif self.inTheAir:
-			# print "In the air"
+			# If currently in the air
 			if (self.nextX, self.nextY) in self.world.validStand or (self.nextX, self.nextY) in self.world.platforms:
 				# jumped onto a valid standing spot
 				self.inTheAir = False
@@ -511,15 +548,17 @@ class Mario(object):
 					self.world.goombaList.remove((self.x, self.y))
 					self.world.goombas.remove(goombaToDelete)
 
-
 					self.coinScore += 1
 
+				elif (self.x, self.y) in self.world.coinsList:
+					self.coinScore += 1
+					coinIndex = self.world.coinsList.index((self.x, self.y))
+					coinToDelete = self.world.coinObjectList[coinIndex]
+					coinToDelete.undraw() # undraw coin
+					self.world.coinsList.remove((self.x, self.y)) # remove coins from list
+					self.world.coinObjectList.remove(coinToDelete)
 
-
-
-					#find this goomba in the goomba list
-					#remove this goomba from self.world.goombas
-					#coin ++
+			
 
 			elif (self.nextX, self.nextY) in self.world.validAirspace:
 				#jumped into a valid airspace
@@ -527,6 +566,14 @@ class Mario(object):
 				self.falling = True
 				self.x = self.nextX
 				self.y = self.nextY
+
+				if (self.x, self.y) in self.world.coinsList:
+					self.coinScore += 1
+					coinIndex = self.world.coinsList.index((self.x, self.y))
+					coinToDelete = self.world.coinObjectList[coinIndex]
+					coinToDelete.undraw() # undraw coin
+					self.world.coinsList.remove((self.x, self.y)) # remove coins from list
+					self.world.coinObjectList.remove(coinToDelete)
 
 
 
@@ -551,6 +598,14 @@ class Mario(object):
 				print "Mario is now dead"
 				self.alive = False
 
+			elif (self.x, self.y) in self.world.coinsList:
+				self.coinScore += 1
+				coinIndex = self.world.coinsList.index((self.x, self.y))
+				coinToDelete = self.world.coinObjectList[coinIndex]
+				coinToDelete.undraw() # undraw coin
+				self.world.coinsList.remove((self.x, self.y)) # remove coins from list
+				self.world.coinObjectList.remove(coinToDelete)
+
 
 		
 		elif (self.nextX, self.nextY) in self.world.validAirspace:
@@ -560,6 +615,15 @@ class Mario(object):
 			self.x = self.nextX
 			self.y = self.nextY
 
+			if(self.x, self.y) in self.world.coinsList:
+				self.coinScore += 1
+				coinIndex = self.world.coinsList.index((self.x, self.y))
+				coinToDelete = self.world.coinObjectList[coinIndex]
+				coinToDelete.undraw() # undraw coin
+				self.world.coinsList.remove((self.x, self.y)) # remove coins from list
+				self.world.coinObjectList.remove(coinToDelete)
+
+
 		else:
 			# print "not valid"
 			print "not valid move"
@@ -568,7 +632,7 @@ class Mario(object):
 			self.drawValid = False
 
 		# if self.visible and drawValid:
-  #       	# move by 1 grid size
+  		# 	move by 1 grid size
 		# 	self.visibleAgent.moveMario(self.dx, self.dy)
 
         
