@@ -30,19 +30,19 @@ def main():
 	mario = Mario(testWorld, "Mario", 9, 4)
 	testWorld.addMario(mario)
 
-	testWorld.makeVisible()
+	#testWorld.makeVisible()
 
 	sleep(0.5)
 	
 
 	x = True
-	for i in range(10000):
+	for i in range(1000):
 		if not mario.alive:
-			print "mario died - the main loop"
+			print "mario died or got to the flag - the main loop"
 			#sleep(3)
 			break
 
-		sleep(0.5)
+		sleep(0.05)
 		testWorld.goombaList = []
 		testWorld.goombaListLastDirection = []
 		for goomba in testWorld.goombas:
@@ -52,5 +52,7 @@ def main():
 		mario.update((random()*2)-1)
 
 		
+
+	print "coin Score: ", mario.coinScore
 
 main()

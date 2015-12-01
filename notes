@@ -23,3 +23,6 @@ November 16:
 Fixed many bugs. Can run in simulation. Mario can kill goombas, and can be
 killed by goombas in many different ways. It works by using a random generator
 as well. Need to add coin count, coinbox count, secret room, and end flag. 
+
+November 30:
+Fixed coin and coin box bugs. Did a lot of testing. Connected Mario to NEAT. However, Mario seems to converge to one, bad behavior after the first generation or so. Need to check what's wrong with that. 
