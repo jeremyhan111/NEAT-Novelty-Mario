@@ -24,5 +24,31 @@ Fixed many bugs. Can run in simulation. Mario can kill goombas, and can be
 killed by goombas in many different ways. It works by using a random generator
 as well. Need to add coin count, coinbox count, secret room, and end flag. 
 
+November 28:
+Added coin collecting functionality. There are some weird things happening to 
+mario when he collects coins. Sometimes he dies when he's not supposed to. 
+
 November 30:
 Fixed coin and coin box bugs. Did a lot of testing. Connected Mario to NEAT. However, Mario seems to converge to one, bad behavior after the first generation or so. Need to check what's wrong with that. 
+
+December 1:
+Tried to fix what was wrong with NEAT. Ended up fixing a lot of other bugs 
+along the way. Implemented a function that would give us the delta x, delta y
+to the nearest coin giving object (coin, coinbox, goomba, secret room). The 
+problem with running mario with NEAT right now is that often it only executes
+moves that are in the 0-1 range. Mario only jumps left, jumps right and ducks.
+Mario never translates left or right. Not sure why. The output of NEAT seems 
+to include negative numbers in the range of [-1, 0] but when we evaluate, we
+never see any translation behavior. Not sure what's going on. Basically Mario
+will execute 10 or 15 moves and then after that, he will execute one move over
+and over again until he runs out of time and the simulation is terminated.
+
+December 2:
+Fixed a bug in the distance function and did some testing to verify that it
+was correct. Unfortunately, or fortunately, when I ran NEAT with the distance
+to the nearest coin as an input, mario occasionally translates left and right.
+This seems to suggest that our previous observation wasn't entirely correct.
+It seems like Mario is sort of capable of translating left or right? However,
+Mario still ends up wasting a lot of time. He translates and jumps and 
+eventually stumbles across the hidden room. Afterwards, Mario just continuously
+ducks at the entrance of the hidden room even though he isn't getting any coins for it. ?????????

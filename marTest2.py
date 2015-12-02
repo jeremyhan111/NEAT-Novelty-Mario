@@ -30,7 +30,7 @@ def main():
 	mario = Mario(testWorld, "Mario", 9, 4)
 	testWorld.addMario(mario)
 
-	#testWorld.makeVisible()
+	testWorld.makeVisible()
 
 	sleep(0.5)
 	
@@ -42,7 +42,6 @@ def main():
 			#sleep(3)
 			break
 
-		sleep(0.05)
 		testWorld.goombaList = []
 		testWorld.goombaListLastDirection = []
 		for goomba in testWorld.goombas:
@@ -50,6 +49,8 @@ def main():
 		
 		
 		mario.update((random()*2)-1)
+		# print mario.distanceToNearestCoin()
+		sleep(0.15)
 
 		
 
