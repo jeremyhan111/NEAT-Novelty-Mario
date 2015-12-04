@@ -19,7 +19,7 @@ def main():
     population.Population.evaluate = coverageFitness #function name 
     pop = population.Population()
     # set how many generations you want evolution to run
-    generations = 15
+    generations = 30
     pop.epoch(generations, report=True, save_best=True)
     # Plots the best/average fitness across the evolution
     visualize.plot_stats(pop.stats)
@@ -37,7 +37,7 @@ def coverageFitness(population):
         myworld.getValidStand()
         myworld.getAirspace()
 
-        mario = Mario(myworld, "Mario", 16, 4)
+        mario = Mario(myworld, "Mario", 1, 5)
         
         mario.setBrain(neatBrain(chromo))
         myworld.addMario(mario)
@@ -64,13 +64,16 @@ class neatBrain(Brain):
         nearestCoin = self.agent.distanceToNearestCoin()
 
         # Set up the sensor data as input for the network
-        inputs = [nearestCoin[0], nearestCoin[1]] 
+        #print "inputs: ", nearestCoin[0], nearestCoin[1]
+        inputs = [nearestCoin, self.agent.coinScore] 
         self.nnet.flush()
 
         # Propagate the inputs throught the network and get the outputs
         outputs = self.nnet.sactivate(inputs)
+        #print "output: ", outputs[0]
 
         # Use the outputs to control the agent's translation and rotation
-        return outputs[0]
+        #print outputs[0]#, outputs[1], outputs[2], outputs[3], outputs[4]) 
+        return outputs[0]#, outputs[1], outputs[2], outputs[3], outputs[4]) 
 
 main()

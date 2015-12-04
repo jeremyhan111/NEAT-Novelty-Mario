@@ -47,13 +47,11 @@ def main():
 		for goomba in testWorld.goombas:
 			goomba.moveGoomba()
 		
-		
+		print "mario nearest coin: ", mario.distanceToNearestCoin()
 		mario.update((random()*2)-1)
-		# print mario.distanceToNearestCoin()
-		sleep(0.15)
-
-		
+		sleep(4)
 
 	print "coin Score: ", mario.coinScore
+	
 
 main()
