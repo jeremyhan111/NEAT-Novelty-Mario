@@ -7,7 +7,7 @@ from math import *
 class World(object):
 	""" COMMENT """
 
-	def __init__(self, name, width, height, gridDim = 10, delay = 0.15):
+	def __init__(self, name, width, height, gridDim = 10, delay = 0.01):
 		""" Initializes a world object.
 
 			name - name of world object
@@ -98,14 +98,13 @@ class World(object):
 		"""Moves all of the marios in the world by stepping their brains.
 		When the world is visible, sleeps for the delay time between steps"""
 
-		self.marios.stepBrain()
-        
-
 		self.goombaList = []
 		self.goombaListLastDirection = []
 		
 		for goomba in self.goombas:
 			goomba.moveGoomba()
+
+		self.marios.stepBrain()
 
 		if self.madeWin:
 			sleep(self.delay)
@@ -329,9 +328,9 @@ class World(object):
 		for bonus in self.hiddenRoomBonuses:
 			maxCoinScore += bonus
 
-		maxCoinScore += 5
+		maxCoinScore += 5 # for flag
 
-		self.maxCoinScore = maxCoinScore
+		self.maxCoinScore = (maxCoinScore) * 1.0
 
 
 	def worldDetailsForNoveltyHelper(self):
@@ -510,7 +509,7 @@ class Mario(object):
 		self.drawValid = True
 
 		self.coinScore = 0
-		self.maxCoinScore = maxCoinScore
+		self.maxCoinScore = self.world.maxCoinScore #TODO: FIX
 
 		self.alive = True
 
@@ -538,6 +537,13 @@ class Mario(object):
 		self.dx = amt
 		self.dy = 0
 
+
+
+		# if (self.x, self.y) in self.world.goombaList:
+		# 	self.world.marioAlive = False
+		# 	self.alive = False
+		# 	self.drawValid = False
+
 		#check for goombas and marios switching spots
 		if amt == 1: # if mario is moving right, check that goomba didn't just move to the left of mario
 			if (self.x, self.y) in self.world.goombaList:
@@ -549,7 +555,9 @@ class Mario(object):
 					# print "Mario is now dead mar right goomb left"
 					self.world.marioAlive = False
 					self.alive = False
-					self.drawValid = False
+					# self.drawValid = False
+
+
 
 		elif amt == -1: # mario is moving left, check that a goomba didn't just move to the right of mario
 			if (self.x, self.y) in self.world.goombaList:
@@ -561,7 +569,10 @@ class Mario(object):
 					# print "Mario is now dead mar left goomb right"
 					self.world.marioAlive = False
 					self.alive = False
-					self.drawValid = False
+					# self.drawValid = False
+
+
+
 
 
 	def jump(self, direction):
@@ -613,7 +624,11 @@ class Mario(object):
 
 		self.drawValid = True
 
-		if (self.nextX, self.nextY) in self.world.finishFlag:
+		if not self.alive:
+			# print "mario's dead?"
+			pass
+
+		elif (self.nextX, self.nextY) in self.world.finishFlag:
 			# print "Mario got to the finish flag"
 			self.x = self.nextX
 			self.y = self.nextY
@@ -624,7 +639,9 @@ class Mario(object):
 
 
 		elif self.jumpingUp:
+
 			# If jumping up into the air
+			# print "Jumping up into the air"
 			if (self.nextX, self.nextY) in self.world.validAirspace:
 				self.x = self.nextX
 				self.y = self.nextY
@@ -677,7 +694,7 @@ class Mario(object):
 
 
 
-				elif (self.x, self.y) in self.world.coinsList:
+				if (self.x, self.y) in self.world.coinsList:
 					self.gotCoinMakeBank()
 			
 
@@ -699,10 +716,10 @@ class Mario(object):
 				self.dy = 0
 				self.drawValid = False
 
-	
-		elif (self.nextX, self.nextY) in self.world.validStand or (self.nextX, self.nextY) in self.world.platforms:
-			# print "is a valid standing spot"
 
+		# handles translate?
+		elif (self.nextX, self.nextY) in self.world.validStand or (self.nextX, self.nextY) in self.world.platforms:
+			
 			self.x = self.nextX
 			self.y = self.nextY
 
@@ -722,16 +739,12 @@ class Mario(object):
 			if (self.x, self.y) in self.world.goombaList:
 				# print "Mario is now dead"
 				self.alive = False
-				self.drawValid = False
 				self.world.marioAlive = False
-
-				print "mario died"
 
 			elif (self.x, self.y) in self.world.coinsList:
 				self.gotCoinMakeBank()
 
 
-		
 		elif (self.nextX, self.nextY) in self.world.validAirspace:
 			# print "got into a valid airspace "
 			self.inTheAir = True
@@ -749,6 +762,14 @@ class Mario(object):
 			self.dx = 0 
 			self.dy = 0
 			self.drawValid = False
+
+			#check for goombas
+			if (self.x, self.y) in self.world.goombaList:
+				# print "Mario is now dead"
+				self.alive = False
+				self.world.marioAlive = False
+
+
 
 		# if self.visible and drawValid:
   		# 	move by 1 grid size
@@ -770,7 +791,7 @@ class Mario(object):
 		maxCmd = cmd.index(max(cmd))
 		
 		if not self.inTheAir and not self.falling:
-			# print "Excecuting command", maxCmd, 
+			# print "Excecuting command at location: ", (self.x, self.y),
 
 			if maxCmd == 0: # move left
 				# print "move left",
@@ -831,6 +852,7 @@ class Mario(object):
 			dx = self.x - self.lastX
 			dy = self.y - self.lastY
 			self.visibleAgent.moveMario(dx, dy)
+		
 
 
 	def getBehavior(self):
@@ -848,6 +870,8 @@ class Mario(object):
 		"""Calculates distance to nearest coin, coinbox, goomba or entrance"""
 		minDistance = 100000000000
 		minTuple = None
+
+		# print "in calc dist", (self.x, self.y)
 
 
 		for coin in self.world.coinsList:
@@ -874,11 +898,16 @@ class Mario(object):
 				minTuple = goomba
 
 
+		counter = 0
 		for entrance in self.world.hiddenEntrances:
-			distance = self.calculateDistance(entrance, (self.x, self.y))
-			if distance < minDistance:
-				minDistance = distance
-				minTuple = entrance
+			if self.world.hiddenRoomBonuses[counter] != 0:
+
+				distance = self.calculateDistance(entrance, (self.x, self.y))
+				if distance < minDistance:
+					minDistance = distance
+					minTuple = entrance
+
+			counter += 1
 
 
 		if minTuple is None: 
@@ -886,6 +915,7 @@ class Mario(object):
 		# this should never happen because the hidden entrances should always exist
 			return (self.world.finishFlag[0]-self.x, self.world.finishFlag[1]-self.y)
 		else:		
+			# print "returning: ", (minTuple[0] - self.x, self.y - minTuple[1])
 			return (minTuple[0] - self.x, self.y - minTuple[1])
 
 

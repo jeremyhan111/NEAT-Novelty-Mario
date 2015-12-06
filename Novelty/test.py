@@ -4,9 +4,12 @@ from random import *
 
 def main():
 
-	testWorld = World("test", 1080, 280, 40)
+	# testWorld = World("test", 1080, 280, 40)
+	# testWorld.readWorldConfigFile("testConfig.txt")
+	
+	testWorld = World("test", 2000, 400, 40)
+	testWorld.readWorldConfigFile("finalWorld.txt")
 
-	testWorld.readWorldConfigFile("testConfig.txt")
 
 	print "\nground:\n", testWorld.ground
 	print "\nplatform\n", testWorld.platforms
@@ -32,6 +35,7 @@ def main():
 
 	testWorld.makeVisible()
 
+	sleep(100)
 	sleep(0.5)
 	
 

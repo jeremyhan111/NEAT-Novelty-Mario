@@ -6,7 +6,9 @@ import cPickle as pickle
 from math import sqrt
 
 # Global variables to set up novelty search 
-novSearch = NoveltySearch(15, 100, 0.25, 2, 93, 24*7)
+novSearch = NoveltySearch(15, 100, 0.25, 2, 93, 24*7*sqrt(778)) # For test world
+# novSearch = NoveltySearch(15, 100, 0.25, 2, 156, ) # For final world
+
 bestChromos = []
 bestScore = 0
 
@@ -14,13 +16,18 @@ bestScore = 0
 def main():
     global novSearch
 
-    myworld = World("Simulator", 1080, 280, 40)
+    # myworld = World("Simulator", 1080, 280, 40)
+    # myworld.readWorldConfigFile("testConfig.txt")
 
-    myworld.readWorldConfigFile("testConfig.txt")
+    myworld = World("Simulator", 2000, 400, 40)
+    myworld.readWorldConfigFile("finalWorld.txt")
+
     myworld.getValidStand()
     myworld.getAirspace()
 
-    mario = Mario(myworld, "Mario", 0, 5)
+    # mario = Mario(myworld, "Mario", 0, 5)
+
+    mario = Mario(myworld, "Mario", 0, 8) # for final world
 
     # set up NEAT
     config.load("marNovelty_config")
@@ -31,7 +38,7 @@ def main():
     pop = population.Population()
 
     # set how many generations you want evolution to run
-    generations = 15
+    generations = 50
     pop.epoch(generations, report=True)
     
     # After evolution completes...
@@ -78,12 +85,19 @@ def noveltyFitness(population):
         chromo = population[i]
 
         # set up your simulator
-        myworld = World("Simulator", 1080, 280, 40)
-        myworld.readWorldConfigFile("testConfig.txt")
+        # myworld = World("Simulator", 1080, 280, 40)
+        # myworld.readWorldConfigFile("testConfig.txt")
+
+        myworld = World("Simulator", 2000, 400, 40)
+        myworld.readWorldConfigFile("finalWorld.txt")
+
         myworld.getValidStand()
         myworld.getAirspace()
 
-        mario = Mario(myworld, "Mario", 0, 5)
+        # mario = Mario(myworld, "Mario", 0, 5)
+        
+        mario = Mario(myworld, "Mario", 0, 8)
+
 
         mario.setBrain(neatBrain(chromo))
         myworld.addMario(mario)
@@ -106,7 +120,6 @@ def noveltyFitness(population):
         behavior = mario.getBehavior()
         novelty = novSearch.checkArchive(behavior, chromo)
 
-        # print "\n**************************NOVELTY: ", novelty
         chromo.fitness = novelty
     
     if bestScoreOfGen > bestScore:
@@ -126,11 +139,16 @@ class neatBrain(Brain):
         self.timer = 1500
 
     def selectAction(self):
+
         nearestCoin = self.agent.distanceToNearestCoin()
+        dx = nearestCoin[0] / (self.agent.world.numGridX * 1.0)
+        dy = nearestCoin[1] / (self.agent.world.numGridY * 1.0)
+        fitness = self.agent.coinScore / (self.agent.world.maxCoinScore  * 1.0)
 
         # Set up the sensor data as input for the network
-        inputs = [nearestCoin[0]/26.0, nearestCoin[1]/6.0, self.agent.coinScore/55.0, 1]
+        inputs = [dx, dy, fitness, 1]
 
+       # print inputs
         self.timer -= 1
         self.nnet.flush()
 
