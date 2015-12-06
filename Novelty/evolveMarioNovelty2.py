@@ -38,7 +38,7 @@ def main():
     pop = population.Population()
 
     # set how many generations you want evolution to run
-    generations = 5
+    generations = 15
     pop.epoch(generations, report=True)
     
     # After evolution completes...
