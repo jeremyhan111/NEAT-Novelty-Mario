@@ -49,6 +49,9 @@ class World(object):
 
 		self.madeWin = False
 
+		#for novelty:
+		self.possibleTravel = 93
+
 
 
 

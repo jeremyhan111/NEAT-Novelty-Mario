@@ -32,12 +32,12 @@ def coverageFitness(population):
         chromo = population[i]
         
         # set up your simulator
-        myworld = World("Simulator", 2000, 400, 40)
-        myworld.readWorldConfigFile("finalWorld.txt")
+        myworld = World("Simulator", 1080, 280, 40)
+        myworld.readWorldConfigFile("testConfig.txt")
         myworld.getValidStand()
         myworld.getAirspace()
 
-        mario = Mario(myworld, "Mario", 0, 8)
+        mario = Mario(myworld, "Mario", 0, 5)
         
         mario.setBrain(neatBrain(chromo))
         myworld.addMario(mario)
@@ -65,7 +65,7 @@ class neatBrain(Brain):
 
         # Set up the sensor data as input for the network
         #print "inputs: ", nearestCoin[0], nearestCoin[1]
-        inputs = [nearestCoin, self.agent.coinScore] 
+        inputs = [nearestCoin, self.agent.coinScore, self.agent.stall] 
         self.nnet.flush()
         #print "coinscore: ", self.agent.coinScore
 

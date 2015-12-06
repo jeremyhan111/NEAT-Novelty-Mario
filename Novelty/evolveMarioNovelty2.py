@@ -1,4 +1,4 @@
-from marSimNovelty import *
+from marioSim2 import *
 from neat import config, population, chromosome, genome, visualize
 from neat.nn import nn_pure as nn
 from noveltySearch import *
@@ -7,7 +7,6 @@ from math import sqrt
 
 # Global variables to set up novelty search 
 novSearch = NoveltySearch(15, 100, 0.25, 2, 93, 24*7*sqrt(778)) # For test world
-# novSearch = NoveltySearch(15, 100, 0.25, 2, 156, ) # For final world
 
 bestChromos = []
 bestScore = 0
@@ -16,18 +15,18 @@ bestScore = 0
 def main():
     global novSearch
 
-    # myworld = World("Simulator", 1080, 280, 40)
-    # myworld.readWorldConfigFile("testConfig.txt")
+    myworld = World("Simulator", 1080, 280, 40)
+    myworld.readWorldConfigFile("testConfig.txt")
 
-    myworld = World("Simulator", 2000, 400, 40)
-    myworld.readWorldConfigFile("finalWorld.txt")
+    #myworld = World("Simulator", 2000, 400, 40)
+    #myworld.readWorldConfigFile("finalWorld.txt")
 
     myworld.getValidStand()
     myworld.getAirspace()
 
-    # mario = Mario(myworld, "Mario", 0, 5)
+    mario = Mario(myworld, "Mario", 0, 5)
 
-    mario = Mario(myworld, "Mario", 0, 8) # for final world
+    # mario = Mario(myworld, "Mario", 0, 8) # for final world
 
     # set up NEAT
     config.load("marNovelty_config")
@@ -85,18 +84,18 @@ def noveltyFitness(population):
         chromo = population[i]
 
         # set up your simulator
-        # myworld = World("Simulator", 1080, 280, 40)
-        # myworld.readWorldConfigFile("testConfig.txt")
+        myworld = World("Simulator", 1080, 280, 40)
+        myworld.readWorldConfigFile("testConfig.txt")
 
-        myworld = World("Simulator", 2000, 400, 40)
-        myworld.readWorldConfigFile("finalWorld.txt")
+        # myworld = World("Simulator", 2000, 400, 40)
+        # myworld.readWorldConfigFile("finalWorld.txt")
 
         myworld.getValidStand()
         myworld.getAirspace()
 
-        # mario = Mario(myworld, "Mario", 0, 5)
+        mario = Mario(myworld, "Mario", 0, 5)
         
-        mario = Mario(myworld, "Mario", 0, 8)
+        #mario = Mario(myworld, "Mario", 0, 8)
 
 
         mario.setBrain(neatBrain(chromo))
@@ -136,26 +135,26 @@ class neatBrain(Brain):
 
         # Turn the flat chromosome into a neural network
         self.nnet = nn.create_ffphenotype(chromo)
-        self.timer = 1500
+        #self.timer = 1500
 
     def selectAction(self):
 
         nearestCoin = self.agent.distanceToNearestCoin()
-        dx = nearestCoin[0] / (self.agent.world.numGridX * 1.0)
-        dy = nearestCoin[1] / (self.agent.world.numGridY * 1.0)
-        fitness = self.agent.coinScore / (self.agent.world.maxCoinScore  * 1.0)
+        # dx = nearestCoin[0] / (self.agent.world.numGridX * 1.0)
+        # dy = nearestCoin[1] / (self.agent.world.numGridY * 1.0)
+        fitness = self.agent.getFitness()
 
         # Set up the sensor data as input for the network
-        inputs = [dx, dy, fitness, 1]
+        inputs = [nearestCoin]#, self.agent.coinScore, self.agent.stall]
 
        # print inputs
-        self.timer -= 1
+        #self.timer -= 1
         self.nnet.flush()
 
         # Propagate the inputs throught the network and get the outputs
         outputs = self.nnet.sactivate(inputs)
         # Use the outputs to control the agent's translation and rotation
-        return outputs
+        return [outputs[0], outputs[1], outputs[2], outputs[3], outputs[4]]
 
 main()
 
