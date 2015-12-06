@@ -85,6 +85,7 @@ class World(object):
             
 			print "\n"
 
+
 	def calculateMaxCoinScore(self):
 		self.maxCoinScore = len(self.goombaList) + len(self.coinsList) + len(self.coinboxesList) + 15*len(self.hiddenRoomBonuses)
 
@@ -97,16 +98,17 @@ class World(object):
 		"""Moves all of the marios in the world by stepping their brains.
 		When the world is visible, sleeps for the delay time between steps"""
 
-		self.marios.stepBrain()
-        
-		if self.madeWin:
-			sleep(self.delay)
-
 		self.goombaList = []
 		self.goombaListLastDirection = []
 		
 		for goomba in self.goombas:
 			goomba.moveGoomba()
+
+		self.marios.stepBrain()
+
+		if self.madeWin:
+			sleep(self.delay)
+
 
 
 
@@ -247,10 +249,15 @@ class World(object):
 
 		for i in range(len(fileWordList) - 1):
 
-			if word != fileWordList[i] or len(wordList) <= 1:
+			if word != fileWordList[i]: #or len(wordList) <= 1:
 				self.fileError(2)
 
+			while len(wordList) == 0:
+				line = worldFile.readline()
+				wordList = line.split()
+
 			word = wordList.pop(0)
+
 			while word != fileWordList[i+1] or len(word) == 1:
 				if fileWordList[i] == "hiddenRoomBonus":
 					bonus = atoi(word)
@@ -287,8 +294,7 @@ class World(object):
 						self.hiddenEntrances.append((x, y))
 
 					elif fileWordList[i] == "finishFlag":
-						#self.finishFlag.append((x, y))
-						pass
+						self.finishFlag.append((x, y))
 
 				while len(wordList) == 0:
 					line = worldFile.readline()
@@ -296,7 +302,7 @@ class World(object):
 
 				word = wordList.pop(0)
 
-
+		# now calculate maxCoinScore
 		self.calculateMaxCoinScore()
 		#print self.maxCoinScore
 
@@ -568,6 +574,8 @@ class Mario(object):
 		self.dy = +1
 
 	def gotCoinMakeBank(self):
+		""" Increment the coinScore, undraw the coin and remove the coin
+			from related coin lists """
 
 		self.coinScore += 1
 		coinIndex = self.world.coinsList.index((self.x, self.y))
@@ -585,8 +593,14 @@ class Mario(object):
 		
 		self.drawValid = True
 
-		if (self.nextX, self.nextY) in self.world.finishFlag:
+		if not self.alive:
+			# print "mario's dead?"
+			pass
+
+		elif (self.nextX, self.nextY) in self.world.finishFlag:
 			# print "Mario got to the finish flag"
+			self.x = self.nextX
+			self.y = self.nextY
 			self.coinScore += 5
 			self.alive = False
 			self.world.marioAlive = False
@@ -705,7 +719,6 @@ class Mario(object):
 			if (self.x, self.y) in self.world.goombaList:
 				# print "Mario is now dead"
 				self.alive = False
-				self.drawValid = False
 				self.world.marioAlive = False
 				#print "4"
 
@@ -733,6 +746,13 @@ class Mario(object):
 			self.dx = 0 
 			self.dy = 0
 			self.drawValid = False
+
+			#check for goombas
+			if (self.x, self.y) in self.world.goombaList:
+				# print "Mario is now dead"
+				self.alive = False
+				self.world.marioAlive = False
+
 
 		# if self.visible and drawValid:
   		# 	move by 1 grid size
@@ -883,6 +903,53 @@ class Mario(object):
 				return -1*minDistance
 			else:
 				return minDistance
+
+
+	def minDxDyToNearestCoin(self):
+		"""Calculates min dx, dy to nearest coin, coinbox, goomba or entrance"""
+		minDistance = 100000000000
+		minTuple = None
+
+
+		for coin in self.world.coinsList:
+			distance = self.calculateDistance(coin, (self.x, self.y))
+
+			if distance < minDistance:
+				minDistance = distance
+				minTuple = coin
+
+
+		for coinbox in self.world.coinboxObjectList:
+			if coinbox.stillContainsCoin:
+				distance = self.calculateDistance((coinbox.x, coinbox.y), (self.x, self.y))
+				
+				if distance < minDistance:
+					minDistance = distance
+					minTuple = (coinbox.x, coinbox.y)
+
+
+		for goomba in self.world.goombaList:
+			distance = self.calculateDistance(goomba, (self.x, self.y))
+			if distance < minDistance:
+				minDistance = distance
+				minTuple = goomba
+
+
+		for entrance in self.world.hiddenEntrances:
+			distance = self.calculateDistance(entrance, (self.x, self.y))
+			if distance < minDistance:
+				minDistance = distance
+				minTuple = entrance
+
+
+		if minTuple is None: 
+		# if something went wrong, give mario the finish location
+		# this should never happen because the hidden entrances should always exist
+			return (self.world.finishFlag[0]-self.x, self.world.finishFlag[1]-self.y)
+		else:		
+			return (minTuple[0] - self.x, self.y - minTuple[1])
+
+
 
 
 	def setBrain(self, brain):
