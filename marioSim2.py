@@ -85,6 +85,9 @@ class World(object):
             
 			print "\n"
 
+	def calculateMaxCoinScore(self):
+		self.maxCoinScore = len(self.goombaList) + len(self.coinsList) + len(self.coinboxesList) + 15*len(self.hiddenRoomBonuses)
+
 	def addMario(self, mario):
 		"""Adds an agent to the world"""
 		self.marios = mario
@@ -294,6 +297,9 @@ class World(object):
 				word = wordList.pop(0)
 
 
+		self.calculateMaxCoinScore()
+		#print self.maxCoinScore
+
 
 	def fileError(self, errNum):
 
@@ -445,7 +451,7 @@ class Goomba(object):
 class Mario(object):
 	"""docstring for Mario"""
 
-	def __init__(self, world, name, x, y, maxCoinScore = 51.0, color = "red"):
+	def __init__(self, world, name, x, y, color = "red"):
 		""" COMMENT """
 
 		self.world = world
@@ -475,7 +481,8 @@ class Mario(object):
 		self.drawValid = True
 
 		self.coinScore = 0
-		self.maxCoinScore = maxCoinScore
+		self.maxCoinScore = self.world.maxCoinScore
+		#print self.maxCoinScore
 		self.movingScore = 0
 
 
@@ -490,7 +497,11 @@ class Mario(object):
 
 
 	def getFitness(self):
-		return (self.movingScore + self.coinScore) / (self.maxCoinScore + 15)
+		#print (self.coinScore) / (self.maxCoinScore)
+		#print "coinScore: ", self.coinScore
+		#print "maxCoinScore: ", self.maxCoinScore
+		return self.coinScore*1.0 / self.maxCoinScore
+		#return 0.1
 
 	def translate(self, amt):
 		""" where amt is -1, 0, 1 """
@@ -511,7 +522,7 @@ class Mario(object):
 					# mario is now dead because he walked past a goomba
 					# print "Mario is now dead mar right goomb left"
 					self.world.marioAlive = False
-					print "1"
+					#print "1"
 					self.alive = False
 
 		elif amt == -1: # mario is moving left, check that a goomba didn't just move to the right of mario
@@ -524,7 +535,7 @@ class Mario(object):
 					# print "Mario is now dead mar left goomb right"
 					self.world.marioAlive = False
 					self.alive = False
-					print "2"
+					#print "2"
 
 
 	def jump(self, direction):
@@ -579,9 +590,9 @@ class Mario(object):
 			self.coinScore += 5
 			self.alive = False
 			self.world.marioAlive = False
-			print "next: ", self.nextX, self.nextY
-			print "finish: ", self.world.finishFlag
-			print "3"
+			#print "next: ", self.nextX, self.nextY
+			#print "finish: ", self.world.finishFlag
+			#print "3"
 
 
 
@@ -677,10 +688,16 @@ class Mario(object):
 			if self.duck and (self.x, self.y) in self.world.hiddenEntrances:
 				bonusIndex = self.world.hiddenEntrances.index((self.x, self.y))
 				self.coinScore += self.world.hiddenRoomBonuses[bonusIndex]
+				#print "length of hiddenroomBonus: ", len(self.world.hiddenRoomBonuses)
+				#print "length of hiddenEntrances: ", len(self.world.hiddenEntrances)
+				self.world.hiddenEntrances.remove((self.x, self.y))
+				self.world.hiddenRoomBonuses.remove(self.world.hiddenRoomBonuses[bonusIndex])
+				#p#rint "length of hiddenroomBonus: ", len(self.world.hiddenRoomBonuses)
+				#print "length of hiddenEntrances: ", len(self.world.hiddenEntrances)
 
-				# print "#############################got bonus! of", self.world.hiddenRoomBonuses[bonusIndex]
 
-				self.world.hiddenRoomBonuses[bonusIndex] = 0
+				#self.world.hiddenRoomBonuses[bonusIndex] = 0
+				self.world.hiddenEntrances
 
 				self.duck = False
 
@@ -690,7 +707,7 @@ class Mario(object):
 				self.alive = False
 				self.drawValid = False
 				self.world.marioAlive = False
-				print "4"
+				#print "4"
 
 				#print "mario died"
 
@@ -736,39 +753,42 @@ class Mario(object):
 
 		#print "command", cmd,
 
-		if (self.x, self.y) not in self.uniqueLocations:
-			self.uniqueLocations.append((self.x, self.y))
-			self.movingScore += 0.1
-			#print self.uniqueLocations
 
-		if cmd > 1 or cmd < -1:
-			print "Invalid move. Has to be between [-1, 1]\n"
-			exit()
+		# if cmd > 1 or cmd < -1:
+		# 	print "Invalid move. Has to be between [-1, 1]\n"
+		# 	exit()
+
+		maxCmd = cmd.index(max(cmd))
+
 
 		if not self.inTheAir and not self.falling:
 			#print "Excecuting command"
 
-			if cmd >= -1 and cmd < -0.6: # move left
+			if maxCmd == 0: # move left
 				#print "move left"
 				self.translate(-1)
 				self.duck = False
 
-			elif cmd >= -0.6 and cmd < -0.2: # move right
+			elif maxCmd == 1: # move right
 				#print "move right"
 				self.translate(1)
 				self.duck = False
 
-			elif cmd >= -0.2 and cmd < 0.2: # jump left
+			elif maxCmd == 2: # jump left
 				#print "jump left"
 				self.jump(-1)
 				self.duck = False
+				# if (self.coinScore > 0):
+				# 	self.coinScore -= 0.2
 
-			elif cmd >= 0.2 and cmd < 0.6:  # jump right
+			elif maxCmd == 3:  # jump right
 				#print "jump right"
 				self.jump(1)
 				self.duck = False
+				# if (self.coinScore > 0):
+				# 	self.coinScore -= 0.2
 
-			else: # duck
+			elif maxCmd == 4: # duck
 				#print "duck"
 				self.duck = True
 				self.nextX = self.x
@@ -858,8 +878,11 @@ class Mario(object):
 			#print "just before: ", (minTuple[0]-self.x, minTuple[1]-self.y)
 			#print "minTuple0: ", minTuple[0], "minTuple1: ", minTuple[1]
 			#print "self.x: ", self.x, "self.y: ", self.y
-			#return (minTuple[0]-self.x, minTuple[1]-self.y)
-			return minDistance
+			#return (minTuple[0]-self.x, minTuple[1]-self.y
+			if (self.x - minTuple[0] > 0):
+				return -1*minDistance
+			else:
+				return minDistance
 
 
 	def setBrain(self, brain):

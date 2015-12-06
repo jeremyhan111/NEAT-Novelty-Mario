@@ -35,12 +35,12 @@ def main(argv=None):
     chromosome.node_gene_type = genome.NodeGene
 
     # set up your simulator
-    myworld = World("Simulator", 1080, 280, 40)
-    myworld.readWorldConfigFile("testConfig.txt")
+    myworld = World("Simulator", 2000, 400, 40)
+    myworld.readWorldConfigFile("finalWorld.txt")
     myworld.getValidStand()
     myworld.getAirspace()
 
-    mario = Mario(myworld, "Mario", 1, 5)
+    mario = Mario(myworld, "Mario", 17, 8)
     myworld.addMario(mario)
     myworld.makeVisible()
     mario.setBrain(neatBrain(chromo, logFP))
@@ -71,7 +71,8 @@ class neatBrain(Brain):
 
     def selectAction(self):
         nearestCoin = self.agent.distanceToNearestCoin() 
-        print nearestCoin
+        print 'nearest coin: ', nearestCoin
+        print 'COINSCORE: ', self.agent.coinScore
 
 
         # Set up the sensor data as input for the network
@@ -79,8 +80,8 @@ class neatBrain(Brain):
         self.logfile.write("Coinscore: %.2f %.2f" % tuple(inputs))
         self.nnet.flush()
         outputs = self.nnet.sactivate(inputs)
-        print outputs[0]
-        self.logfile.write(" motionChoice: %.2f \n" % tuple(outputs))
-        return outputs[0]
+        #print outputs[0]
+        self.logfile.write(" motionChoice: %.2f %.2f %.2f %.2f %.2f\n" % tuple(outputs))
+        return outputs[0], outputs[1], outputs[2], outputs[3], outputs[4]
 
 main()

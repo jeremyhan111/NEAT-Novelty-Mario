@@ -27,7 +27,7 @@ def main():
 
 	testWorld.printWorld()
 
-	mario = Mario(testWorld, "Mario", 9, 4)
+	mario = Mario(testWorld, "Mario", 12, 5)
 	testWorld.addMario(mario)
 
 	testWorld.makeVisible()
@@ -49,7 +49,7 @@ def main():
 		
 		print "mario nearest coin: ", mario.distanceToNearestCoin()
 		mario.update((random()*2)-1)
-		sleep(4)
+		sleep(.04)
 
 	print "coin Score: ", mario.coinScore
 	
