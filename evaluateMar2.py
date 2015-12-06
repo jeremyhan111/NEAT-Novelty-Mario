@@ -40,7 +40,7 @@ def main(argv=None):
     myworld.getValidStand()
     myworld.getAirspace()
 
-    mario = Mario(myworld, "Mario", 16, 4)
+    mario = Mario(myworld, "Mario", 1, 5)
     myworld.addMario(mario)
     myworld.makeVisible()
     mario.setBrain(neatBrain(chromo, logFP))
@@ -48,6 +48,7 @@ def main(argv=None):
  
     for i in range(1500):
         if not mario.alive:
+            print "hi"
             break
 
         myworld.step()
@@ -72,11 +73,13 @@ class neatBrain(Brain):
         nearestCoin = self.agent.distanceToNearestCoin() 
         print nearestCoin
 
+
         # Set up the sensor data as input for the network
-        inputs = [nearestCoin[0], nearestCoin[1]]
+        inputs = [nearestCoin, self.agent.coinScore]
         self.logfile.write("Coinscore: %.2f %.2f" % tuple(inputs))
         self.nnet.flush()
         outputs = self.nnet.sactivate(inputs)
+        print outputs[0]
         self.logfile.write(" motionChoice: %.2f \n" % tuple(outputs))
         return outputs[0]
 
