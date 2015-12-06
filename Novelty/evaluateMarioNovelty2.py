@@ -89,7 +89,7 @@ class neatBrain(Brain):
         print "hiiiiiiii", nearestCoin, self.agent.coinScore, self.agent.stall
 
         # Set up the sensor data as input for the network
-        inputs = [nearestCoin]#, self.agent.coinScore, self.agent.stall]
+        inputs = [nearestCoin / sqrt(2402.0)]#, self.agent.coinScore, self.agent.stall]
         print inputs
 
         self.timer -= 1

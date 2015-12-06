@@ -6,7 +6,8 @@ import cPickle as pickle
 from math import sqrt
 
 # Global variables to set up novelty search 
-novSearch = NoveltySearch(15, 100, 0.25, 2, 93, 24*7*sqrt(778)) # For test world
+# novSearch = NoveltySearch(15, 100, 0.25, 2, 93, 24*7*sqrt(778)) # For test world
+novSearch = NoveltySearch(15, 100, 0.25, 2, 156, 50*9*sqrt(2402.0)) # For final world
 
 bestChromos = []
 bestScore = 0
@@ -37,7 +38,7 @@ def main():
     pop = population.Population()
 
     # set how many generations you want evolution to run
-    generations = 50
+    generations = 5
     pop.epoch(generations, report=True)
     
     # After evolution completes...
@@ -139,13 +140,14 @@ class neatBrain(Brain):
 
     def selectAction(self):
 
-        nearestCoin = self.agent.distanceToNearestCoin()
+        normNearestCoin = self.agent.distanceToNearestCoin() / sqrt(2402.0)
         # dx = nearestCoin[0] / (self.agent.world.numGridX * 1.0)
         # dy = nearestCoin[1] / (self.agent.world.numGridY * 1.0)
         fitness = self.agent.getFitness()
 
         # Set up the sensor data as input for the network
-        inputs = [nearestCoin]#, self.agent.coinScore, self.agent.stall]
+        inputs = [normNearestCoin]#, self.agent.coinScore, self.agent.stall]
+
 
        # print inputs
         #self.timer -= 1

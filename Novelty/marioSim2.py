@@ -50,7 +50,9 @@ class World(object):
 		self.madeWin = False
 
 		#for novelty:
-		self.possibleTravel = 93
+		# self.possibleTravel = 93 #for test world
+		self.possibleTravel = 156 #for final world
+
 
 
 
