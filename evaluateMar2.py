@@ -40,7 +40,7 @@ def main(argv=None):
     myworld.getValidStand()
     myworld.getAirspace()
 
-    mario = Mario(myworld, "Mario", 17, 8)
+    mario = Mario(myworld, "Mario", 0, 8)
     myworld.addMario(mario)
     myworld.makeVisible()
     mario.setBrain(neatBrain(chromo, logFP))
