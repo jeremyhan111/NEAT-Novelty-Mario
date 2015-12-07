@@ -4,7 +4,7 @@
 # - Set elitism to 0 to encourage as much diversity as possible
 
 [phenotype]
-input_nodes         = 1
+input_nodes         = 3
 output_nodes        = 5
 max_weight          = 30
 min_weight          = -30

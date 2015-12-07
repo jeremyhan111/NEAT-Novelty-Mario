@@ -611,7 +611,7 @@ class Mario(object):
 			# print "Mario got to the finish flag"
 			self.x = self.nextX
 			self.y = self.nextY
-			self.coinScore += 5
+			#self.coinScore += 5
 			self.alive = False
 			self.world.marioAlive = False
 			#print "next: ", self.nextX, self.nextY

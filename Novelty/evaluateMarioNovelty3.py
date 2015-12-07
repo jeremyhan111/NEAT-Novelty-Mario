@@ -14,7 +14,7 @@ def main(argv=None):
     argv = sys.argv[1:]
     print argv
     if len(argv) != 1:
-        print "Usage: You muset pass a chromosome file to be evaluated"
+        print "Usage: You must pass a chromosome file to be evaluated"
         return
     else:
         chromo_file = argv[0]
@@ -39,15 +39,15 @@ def main(argv=None):
     # myworld.readWorldConfigFile("intermediateConfig.txt")
     # myworld.readWorldConfigFile("testConfig.txt")
 
-    myworld = World("Simulator", 1080, 280, 40) # for final world
-    myworld.readWorldConfigFile("testConfig.txt") # for final world
+    myworld = World("Simulator", 2000, 400, 40) # for final world
+    myworld.readWorldConfigFile("finalWorld.txt") # for final world
 
     myworld.getValidStand()
     myworld.getAirspace()
 
-    mario = Mario(myworld, "Mario", 0, 5) #for test world
+    # mario = Mario(myworld, "Mario", 0, 5) #for test world
 
-    # mario = Mario(myworld, "Mario", 0, 8) # for final world
+    mario = Mario(myworld, "Mario", 0, 8) # for final world
     myworld.addMario(mario)
     myworld.makeVisible()
     mario.setBrain(neatBrain(chromo, logFP))
@@ -77,28 +77,25 @@ class neatBrain(Brain):
         self.nnet = nn.create_ffphenotype(chromo)
         # used to save information about the agent's behavior
         self.logfile = logfile 
-        self.timer = 1500
+        # self.timer = 1500
 
     def selectAction(self):
         # Set up the sensor data as input for the network
         
-        nearestCoin = self.agent.distanceToNearestCoin()
+        # nearestCoin = self.agent.distanceToNearestCoin()
         # dx = nearestCoin[0] / (self.agent.world.numGridX * 1.0)
         # dy = nearestCoin[1] / (self.agent.world.numGridY * 1.0)
         fitness = self.agent.getFitness()
-        #print "hiiiiiiii", nearestCoin, self.agent.coinScore, self.agent.stall
 
         # Set up the sensor data as input for the network
-        inputs = [nearestCoin, self.agent.coinScore, self.agent.stall]
-        print inputs
+        inputs = [self.agent.distanceToNearestCoin(), self.agent.coinScore, self.agent.stall]
 
-        self.timer -= 1
+        # self.timer -= 1
         self.logfile.write("%.2f %.2f %.2f" % tuple(inputs))
         self.nnet.flush()
 
-        #print len(inputs)
         outputs = self.nnet.sactivate(inputs)
-        #self.logfile.write(" motionChoice: %.2f %.2f %.2f %.2f %.2f \n" % tuple(outputs))
+        self.logfile.write(" motionChoice: %.2f %.2f %.2f %.2f %.2f \n" % tuple(outputs))
         return [outputs[0], outputs[1], outputs[2], outputs[3], outputs[4]]
 
 main()
