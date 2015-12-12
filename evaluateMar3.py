@@ -35,12 +35,12 @@ def main(argv=None):
     chromosome.node_gene_type = genome.NodeGene
 
     # set up your simulator
-    myworld = World("Simulator", 1080, 280, 40)
-    myworld.readWorldConfigFile("testConfig.txt")
+    myworld = World("Simulator", 2000, 400, 40)
+    myworld.readWorldConfigFile("finalWorld.txt")
     myworld.getValidStand()
     myworld.getAirspace()
 
-    mario = Mario(myworld, "Mario", 0, 5)
+    mario = Mario(myworld, "Mario", 0, 8)
     myworld.addMario(mario)
     myworld.makeVisible()
     mario.setBrain(neatBrain(chromo, logFP))
@@ -60,7 +60,7 @@ def main(argv=None):
 
     # wait for a mouse click before ending the program
     myworld.window.getMouse()
-    #logFP.write("Fitness %f\n" % fitness)
+    logFP.write("Fitness %f\n" % fitness)
     logFP.close()
 
 class neatBrain(Brain):

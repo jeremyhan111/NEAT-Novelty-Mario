@@ -38,7 +38,7 @@ def main():
     pop = population.Population()
 
     # set how many generations you want evolution to run
-    generations = 30
+    generations = 10
     pop.epoch(generations, report=True)
     
     # After evolution completes...
@@ -144,6 +144,7 @@ class neatBrain(Brain):
         # dx = nearestCoin[0] / (self.agent.world.numGridX * 1.0)
         # dy = nearestCoin[1] / (self.agent.world.numGridY * 1.0)
         fitness = self.agent.coinScore / (self.agent.world.maxCoinScore  * 1.0)
+        
 
         # Set up the sensor data as input for the network
         inputs = [self.agent.distanceToNearestCoin(), self.agent.coinScore, self.agent.stall]

@@ -32,12 +32,12 @@ def coverageFitness(population):
         chromo = population[i]
         
         # set up your simulator
-        myworld = World("Simulator", 1080, 280, 40)
-        myworld.readWorldConfigFile("testConfig.txt")
+        myworld = World("Simulator", 2000, 400, 40)
+        myworld.readWorldConfigFile("finalWorld.txt")
         myworld.getValidStand()
         myworld.getAirspace()
 
-        mario = Mario(myworld, "Mario", 0, 5)
+        mario = Mario(myworld, "Mario", 0, 8)
         
         mario.setBrain(neatBrain(chromo))
         myworld.addMario(mario)
@@ -52,7 +52,6 @@ def coverageFitness(population):
         # set fitness to the coverage
         #print "fitness: ", mario.getFitness()
         chromo.fitness = mario.getFitness()
-        #print mario.getFitness()
 
 class neatBrain(Brain):
     """A brain that uses a NEAT neural network as the controller"""
@@ -68,9 +67,11 @@ class neatBrain(Brain):
         #print "inputs: ", nearestCoin[0], nearestCoin[1]
         inputs = [nearestCoin, self.agent.coinScore, self.agent.stall] 
         self.nnet.flush()
+        #print "coinscore: ", self.agent.coinScore
 
         # Propagate the inputs throught the network and get the outputs
         outputs = self.nnet.sactivate(inputs)
+        #print "output: ", outputs[0]
 
         # Use the outputs to control the agent's translation and rotation
         #print outputs[0]#, outputs[1], outputs[2], outputs[3], outputs[4]) 

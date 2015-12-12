@@ -82,13 +82,17 @@ class neatBrain(Brain):
     def selectAction(self):
         # Set up the sensor data as input for the network
         
-        # nearestCoin = self.agent.distanceToNearestCoin()
+        nearestCoin = self.agent.distanceToNearestCoin()
         # dx = nearestCoin[0] / (self.agent.world.numGridX * 1.0)
         # dy = nearestCoin[1] / (self.agent.world.numGridY * 1.0)
         fitness = self.agent.getFitness()
+        print 'nearest coin: ', nearestCoin
+        print 'COINSCORE: ', self.agent.coinScore
+        print 'max: ', self.agent.maxCoinScore
+        print "stalled", self.agent.stall
 
         # Set up the sensor data as input for the network
-        inputs = [self.agent.distanceToNearestCoin(), self.agent.coinScore, self.agent.stall]
+        inputs = [nearestCoin, self.agent.coinScore, self.agent.stall]
 
         # self.timer -= 1
         self.logfile.write("%.2f %.2f %.2f" % tuple(inputs))
