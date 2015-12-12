@@ -88,6 +88,7 @@ class neatBrain(Brain):
         fitness = self.agent.getFitness()
         #print "hiiiiiiii", nearestCoin, self.agent.coinScore, self.agent.stall
 
+        # print "huh", nearestCoin/sqrt(2402.0)
         # Set up the sensor data as input for the network
         inputs = [nearestCoin, self.agent.coinScore, self.agent.stall]
         print inputs
