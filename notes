@@ -52,15 +52,20 @@ It seems like Mario is sort of capable of translating left or right? However,
 Mario still ends up wasting a lot of time. He translates and jumps and 
 eventually stumbles across the hidden room. Afterwards, Mario just continuously
 ducks at the entrance of the hidden room even though he isn't getting any coins for it. ?????????
-12 5   19 3
-3 1   9 1   12 4   13 1
 
 December 4: 
 Mario works better if we put an input as min distance rather than min tuple. It also 
 work really well if we get rid of coin boxes, since it can't get stuck running into
 them. 
 
-2 7    3 7    4 7
-		9 6    10 6   11 6
-		22 3   24 3   26 3   28 3
-		15 2   16 2   17 2  
+
+Fill in this stuff later
+
+
+December 12:
+Organized all of the files. Added coin type input to differentiate between the 5
+different types of coins (air coin, coin box, goomba, hidden room, flag). Also
+added the finish flag back into world. Fixed some bugs. Mario wasn't dying when 
+he was jumping under the coin box and a goomba passed by. Also fixed the order of 
+events in update. 
+
