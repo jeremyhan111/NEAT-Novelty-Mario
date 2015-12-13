@@ -6,7 +6,7 @@ def main():
 
 	testWorld = World("test", 1080, 280, 40)
 
-	testWorld.readWorldConfigFile("easySmallWorld.txt")
+	testWorld.readWorldConfigFile("hardSmallWorld.txt")
 
 	print "\nground:\n", testWorld.ground
 	print "\nplatform\n", testWorld.platforms
@@ -27,7 +27,7 @@ def main():
 
 	testWorld.printWorld()
 
-	mario = Mario(testWorld, "Mario", 16, 4) 
+	mario = Mario(testWorld, "Mario", 0, 5) 
 	# mario = Mario(testWorld, "Mario", 25, 5) # test flag
 
 	mario.setBrain(randomBrain())

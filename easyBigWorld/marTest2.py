@@ -5,7 +5,7 @@ from random import *
 def main():
 
 	testWorld = World("Simulator", 2000, 400, 40)
-	testWorld.readWorldConfigFile("hardBigWorld.txt")
+	testWorld.readWorldConfigFile("easyBigWorld.txt")
 
 	print "\nground:\n", testWorld.ground
 	print "\nplatform\n", testWorld.platforms

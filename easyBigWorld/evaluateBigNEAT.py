@@ -1,5 +1,5 @@
 import sys
-from marSimulatorNovelty import *
+from marioSimulatorNEAT import *
 from neat import config, population, chromosome, genome, visualize
 from neat.nn import nn_pure as nn
 import cPickle as pickle

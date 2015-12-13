@@ -7,7 +7,7 @@ from math import *
 class World(object):
 	""" COMMENT """
 
-	def __init__(self, name, width, height, gridDim = 10, delay = 0.15):
+	def __init__(self, name, width, height, gridDim = 10, delay = 0.08):
 		""" Initializes a world object.
 
 			name - name of world object
@@ -608,7 +608,7 @@ class Mario(object):
 			self.world.marioAlive = False
 			self.alive = False
 
-			print "finish: ", self.world.finishFlag
+			# print "finish: ", self.world.finishFlag
 
 
 		elif self.jumpingUp:
@@ -709,6 +709,9 @@ class Mario(object):
 
 				print "\n\n~~~ FOUND HIDDEN ENTRANCE ~~~\n\n"
 
+				if len(self.world.hiddenEntrances) == 0:
+					print "************************** FOUND SECOND ************************** \n\n"
+					
 				self.world.hiddenEntrances
 
 				self.duck = False
